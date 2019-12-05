@@ -1,0 +1,67 @@
+### DOCKER COMMIT EJEMPLO
+    -Generar Dockerfile con un simple SO
+    -Instalar o guardar algo desde el contenedor (Hacer cambios)
+        # apt-get install vim
+    -Guardar el contenedor con: docker commit.
+        El commit sirve para que los cambios perduren en el contenedor
+        Los cambios generados solo se guardan en el contenedor, NO sobre la imagen
+        Ejemplo: docker commit <id_contenedor> <nombre_contenedor>
+
+### DOCKER COMPOSE
+    -Herramienta orientada a trabajar con herramientas multi contenedor
+        docker-compose.yml
+    -No viene instalado en el docker Engine
+    -El docker compose debe ser el archivo raiz para llamar al resto de dockerfiles
+
+    ## EJEMPLO DOCKER COMPOSE
+    version: '2'
+    services: #siempre empieza con services, al usar YML es muy importante la TABULACION
+        mysql:
+            build: ./mysql #Ve a la carpeta mysql y ejecuta el dockerfile que encuentres ahi
+            ports:
+                - '3306:3306'
+            environment:
+                MYSQL_USER: root
+                MYSQL_PASSWORD: 1234
+                MYSQL_ROOT_PASSWORD: pass
+                MYSQL_DATABASE: dbase
+            volumes:
+                - db:/var/lib/mysql
+        php:
+            build: ./apache
+            ports:
+                - '80:80'
+            #Volumenes: Son como un disco duro externo en el que el contenedor puede escribir
+            volumes:
+                - ./html:/var/www/html
+            depends_on:
+                - mysql #Estalece que si no ha arrancado el contenedor de mysql, el de php no podra hacerlo
+        phpmyadmin: #Estos nombres son unicos en docker-compose, si se repite el nombre, no levanta el repetido
+            image: phpmyadmin/phpmyadmin #si no existe la imagen, la descarga de docker hub
+            links:
+                - mysql #Se enlaza con el contenedor de mysql
+            ports:
+                - '8080:80'
+            environment: #Conexion a la base de datos
+                PMA_HOST: mysql
+                PMA_PORT: 3306
+    volumes:
+        db:
+    ### FIN EJEMPLO DOCKER COMPOSE
+    Si 2 contenedores base de datos usaran el mismo volumen, podria crear un conflicto, los contenedores
+    se levantarian, pero al establecer las variables de entorno y los links, solo apuntarian al primer 
+    volumen, de manera que los 2 contenedores BBDD leerian los mimos datos
+
+    - docker-compose up -d: Leera el docker composer, levantara los contenedores  y dejara la consola libre
+    - docker-compose ps: Muesta los contenedores levantados con docker-compose, SOLO con docker-compose
+    - docker-compose down: Para los contenedores levantados con docker-compose (todos)
+    - docker-compose down -v: Borra los volumenes de los contenedores al apagarse (docker-compose stop)
+    - docker-compose port <nombre_contenedor> <puerto_contenedor>: Devuelve el puerto que habilita en local
+        Ejemplo: docker-compose post phpmyadmin 80
+    - docker-compose bundle (DAB [distributed application bundle])
+    - docker-compose scale <contenedor_servicio>=<numero>: Permite indicar el numero de contenedores activos para un servicio 
+        Ejemplo: docker-compose scale mysql=5
+            Levantara 5 contenedores MYSQL al mismo tiempo, con nuestra configuracion establecida 
+        
+
+

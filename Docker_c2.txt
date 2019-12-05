@@ -1,0 +1,125 @@
+### DOCKERFILE
+    Ejemplo explicado: https://github.com/armolina/docker/blob/master/Dockerfile
+    Comandos que admite:
+        -FROM: Nombre de la ruta / imagen base que necesita (Siempre es el primero, y solo puede haber uno)
+                Ejemplo: FROM centos7
+                        FROM ubuntu:18:04
+                        FROM scratch (imagen vacia, limpia, sin nada [Util para desarrolladores de SO])
+        -ADD: Permite copiar un archivo desde el host en el contenedor
+            *ADD <mi_fichero> <ruta_destino>
+            Ejemplo: ADD test relateDir/ #agrega test to 'WORKDIR relativeDirContainer/
+        -CMD: Configura comandos por defecto apra ser ejecutados (Puede haber tantos como se quiera)
+            Ejemplo: CMD echo "Test msg"
+                     CMD ["/usr/bin/wc", "--help"]
+        -ENTRYPOINT: Igual que el CMD, pero el comando asignado se configura como el comando principal de la imagen (Solo puede haber uno por Dockerfile).
+                    Siempre es el último que se ejecuta
+            Ejemplo: COPY ./docker-entrypoint.sh /
+            ENTRYPOINT ["/docker-entrypoint.sh"]
+                Al arrancar el contenedor se va a lanzar el script
+        -ENV: Permite crear VARIABLES de entorno
+            Ejemplo: ENV MYSQL_ROOT_PASSWORD toor
+        -EXPOSE: Permite exponer / habilitar un puerto. Si no se pone, no se habilita uno por defecto
+            Ejemplo: EXPOSE 80
+            De esta manera se podra llamar desde el: docker run -p 8000:80
+        -MAINTAINER: Persona que se encarga de ese contenedor
+            Ejemplo: MAINTAINER test <test@gmail.com>
+        -RUN: Ejecuta un comando y cambia el resultado de la imagen final haciendo un commit
+            Ejemplo: RUN apt-get update -y && apt-get install apache2
+                Este comando ejecuta estos comandos Y GUARDA EL ESTADO DE LA IMAGEN, DE MANERA QUE ESTE CONTENEDOR
+                TENDRA APACHE2 INSTALADO LA PROXIMA VEZ QUE SE ENCIENDA.
+        -USER: Establece el usuario para aplicar permisos a la hora de ejcutar los contenedores
+            Ejemplo: USER postgres
+        -VOLUME: Permite montar un volumen para persistir datos DESDE EL CONTENEDOR AL HOST
+                [Útil para hacer un backup de mi contenedor POSTGRES a una ruta de mi local todos los dias a las 23:59:00]
+                VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+                La ruta fisica será: /var/lib/docker/volume
+        -WORKDIR: Establece la ruta origen para los comandos RUN, CMD, ENTRYPOINT, COPY, ADD
+            Ejemplo: WORKDIR /personalConfig, de esta manera si necesito algo, leerá de mi directorio
+                    ENVS WORKDIR/DB_ACCESS/db.txt
+
+##### CILOS DE VIDA DE UN CONTENEDOR ###############
+
+    -Creado (construct)
+    -Arrancado (run)
+    -Suspendido (pause)
+    -No suspendido (unpause)
+    -Parado (stop, [kill]): Si el STOP falla, el KILL lo matará sí o sí. Buena práctica, primero usar SIEMPRE STOP
+    -Rearrancado (start)
+    -Reiniciado (restart)
+    -Borrado (rm)
+
+##### COMANDOS ###############
+
+-Docker build <ruta>: Genera / """ Compila """ la configuración del DockerFile
+    +Admite rutas de imagenes locales o rutas remotas (GIT), leera el root del proyecto y buscara el "Dockerfile"
+    siempre debe estar en la ruta raiz del proyecto
+    Ejemplo: docker build -t <nombre_imagen> <ruta>
+             docker build .
+-Docker search <nombre_imagen>: Permite buscar en el docker hub el nombre de la imagen
+    Ejemplo: docker search "windows"
+-Docker pull <nombre_imagen>: Accede al docker hub y busca la imagen para montarla en local, si no se especifica la versión
+    hace un pull de la última versión estable
+    Ejemplo: docker pull ubuntu
+             docker pull ubuntu:18.04
+             docker pull postgres
+             docker pull mcr.microsoft.com/windows/servercore/iis
+             docker pull wordpress:latest
+-Docker ps: Docker proccess (muestra todos los contenedores)
+-Docker ps -a: Info de todos los contendores (creados O funcionando)
+-Docker images: Muestra imagenes que tengo creadas en local
+-Docker run: Create y arranca el contenedor
+-Docker create <nombre_imagen>: Crea el contenedor SIN LEVANTARLO
+-Docker start <nombre_contenedor>: Arranca el contenedor
+-Docker restart <id_contenedor>
+-Docker pause <id_contenedor>: Para los procesos del contenedor, pero el contenedor sigue encendido (puertos...)
+-Docker unpause <id_contenedor>
+-Docker stop $(docker ps -q): PARA TODOS LOS CONTENEDORES
+-Docker rm -v $(docker ps -aq): BORRA TODOS LOS CONTENEDORES (-v: Borra todos los volumenes asociados a los contenedores)
+-Docker logs <id_contenedor>: Info sobre un contenedor
+-Docker run <nombre_imagen> (El nombre que se ha asignado al hacer la build): Monta el contenedor y lo arranca
+-Docker run -d <nombre_imagen>: Enciende el contenedor y dame el control de la consola local
+-Docker run -d --name <nombre_container_local> <nombre_imagen>: Enciende el contenedor con la consola interactiva de mi maquina local
+-Docker run -d -p puerto_local:puerto_container <nombre_imagen>: Enciende el contenedor usando los puertos locales y 
+    del mismo contenedor, siempre que no esten ocupados (por lo menos el local) ya sea con otro contendor u otra aplacion
+    Ejemplo: docker run -d -p 5432:5432 postgres_img
+-Docker run -it -p puerto_local:puerto_container <nombre_imagen> /bin/bash: Enciende el contenedor, habilita los puertos Y
+    habilita la consola interactiva del PROPIO CONTENEDOR.
+    ***
+    IMPORTANTE:
+        -DECIR QUE LA RUTA DE LA CONSOLA: /bin/bash (posiblemente en las nuevas versiones no haga falta)
+        -TODO LO QUE SE HAGA EN EL CONTENEDOR DESDE ESTA CONSOLA SE QUEDARÁ EN EL EN CONTENEDOR
+        Y SE PERDERA CUANDO EL CONTENEDOR SE APAGUE, REINICIE O ELIMINE
+        - **SI SE QUIEREN CAMBIOS PARA QUE PERDUREN EN EL CONTENEDOR SIEMPRE, SIEMPRE, SIEMPRE SE HACEN DESDE EL DOCKERFILE**
+    ***
+    (si se modifica el dockerfile se debe volver a hacer un build, run...)
+-Docker exec -d <id_contenedor> <comando>: Permite lanzar comandos en contenedores arrancados, sin necesidad de meterme en el contenedor
+    +El contenedor siempre DEBE estar arrancado
+    +Si esta pausedno hara nada, ya que SIEMPRE PARA LAS ACCIONES DEL CONTENEDOR
+    Ejemplo: docker exec -d <id> touch /tmp/test.txt 
+-Docker exec -ti <nombre_container> /bin/bash: Permite entrar al contenedor de un contenedor arrancado
+-Docker run -e VAR_NAME=value -d <nombre_imagen>: la flag -e permite establecer ENV_VARS para el contenedor
+    Ejemplo: docker run --rm --name mysqlwp -e MYSQL_ROOT_PASSWORD=toor -d mysql
+        Arranca docker -> borralo CUANDO EL CONTENEDOR SE PARE (stop) -> establece el nombre "mysqlwp" -> establece la variable de entorno
+        MYSQL_ROOT_PASSWORD=toor -> y libera la consola local para el contenedor mysql
+
+### NETWORKING
+-Docker --link [DEPRECATED]: Permite enlazar dos contenedores entre si, sin que el local sepa que estan enlazados
+    [Aunque este en desuso, docker lo admite, en las nuevas versiones se usa el mismo comando, pero sin el '--link']
+    Ejemplo: Se quiere crear un wordpress (Necesita mysql + apache/php)
+        +Descargar imagen de wordpress
+            docker pull wordpress:latest
+        +Descargar imagen de mysql
+            docker pull mysql:latest
+        +Arrancar MYSQL y establecer una contraseña 
+            docker run -rm --name mysqlwp -e MYSQL_ROOT_PASSWORD=toor -d mysql
+        +Arrancar wordpress enlazando con mysql
+            docker run --name wordpress --link mysqlwp:mysql -p 80:80 -d wordpress
+                Se han enlazado porque wordpress ya conoce el puerto que trabaja MYSQL, además
+                que en el Dockerfile de Mysql se establece que tenga un puerto habilitado para
+                la conexión (EXPOSE)
+        NO dará mensaje de error, pero con "docker ps -a" mostrara que los 2 estas corriendo
+        Ver si estan conectados entre si: docker network ls
+        (https://stackoverflow.com/questions/41093812/how-to-get-docker-containers-to-talk-to-each-other-while-running-on-my-local-hos)
+        +Entrar en localhost:80 para seguir con la configuración del wordpress
+-printenv: Muestra las variables de entorno, solo funciona si estas dentro del contenedor con la consola interactiva (docker run -ti ...)
+        

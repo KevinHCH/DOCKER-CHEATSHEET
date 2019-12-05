@@ -1,0 +1,12 @@
+### DOCKER HUB
+    -Sistema de guardado de imagenes (como github)
+    -Docker build -t <nombre_usuario_docker_hub>/<nombre_imagen> .
+        Ejemplo: Docker build -t pepe/apachephp7.0 .
+        El nombre siempre va primero para luego poder hacer el commit
+
+    Trastear desde el docker hub:
+        -Permite enlazar cuentas con github, bitbucket
+        -Leera los proyectos que le pases, se podran generar imagenes desde el docker hub.
+            Estas imagenes son las que se exportaran e importaran cuando creemos containers
+
+    

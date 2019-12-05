@@ -1,0 +1,36 @@
+##### DOCKER ###############
+-Docker es un sistema que nos permite empaquetar y distrubuir aplicacionas en forma de contendores.
+Dentro d eun entorno de servido, independiente del sistema operativo que corran
+
+-Dockerfile: Archivo de configuración que establece requermientos para el contenedor
+
+-Docker image: Es la suma de un sistema operativo base y de aplicaciones que corren sobre el mismo.
+Es un sistema de archivos y parametros para usar en tiempo de ejecucion, NO TIENE ESTADO Y NUNCA CAMBIA
+UNA IMAGEN PODRIA DEFINIRSE COMO UNA CLASE
+
+-Docker container: Parte mas conocida de Docker, todo el sistema esta basado en poder ejecutarlos.
+Un contenedor es UNA INSTANCIA DE UNA IMAGEN. Puediendo generar N contendores partiendo de la misma imagen.
+La idea principal de este sistema es poder correr tantos contendores de una aplicacion com oqueramos
+dentro del número de servidores que necesitemos
+
+Ejemplo:
+	DOCKERFILE ---> DOCKER IMAGE ---> CONTAINER
+	Una imagen no puede generarse sin un dockerfile, y un container no puede generarse sin una imagen, al final
+	todos dependen de su padre como en el "esquema"
+
+-Docker Compose: Archivo YAML para definir y ejecutar aplicaciones multicontendor (No viene instalado con el Engine de docker)
+
+
+-Docker Engine: Daemon de docker, funciona en el SISTEMA ANFITRION y es el encargado de ejecutar las aplicaciones
+contenidas en los contendores (Funciona en Linux o windows) 
+
+-Docker pod (enjambre): Conjunto de servidores que tienen DOCKER ENGINE instalado y que estan trabjando bajo
+una metodologia de orquestación.
+Para montar estos PODS se puede usar: Swarn, kubernetes (mas usados), apache mesos
+
+-Docker secrets: Datos sensibles, contraseñas, ssh keys, certificados SSL, cualquier informacion que no queramos
+que este en texto plano dentro de los ficheros Dockerfile.
+Buena práctica: Contenedos los params de configuracion, ya que se porpagan rapidamente por la red de servers y
+sonficheros que estan accesibles inmediatamente
+
+

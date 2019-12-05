@@ -1,0 +1,41 @@
+LA FINALIDAD DE DOCKER ES DE USAR Y TIRAR
+
+A la izq, siempre la ruta del local
+docker run --name apache -d -p 8086:80 -v /dir_local:/usr/local/apache2 <img_docker>
+docker run --name apache -d -p 8086:80 -v /dir_local:/usr/local/apache2 httpd
+Al enlazar las carpetas, replica la carpeta local que has puesto, si esta vacia
+en local, estara vacia en docker
+
+-CTRL + U
+-CTRL + K 
+
+-docker volume list
+-docker volume prune: Elimina volumenes que no se usen de manera activa
+Esta creacion de volumenes no elimina el contenido del volumen establecido por el container
+-docker volume <nombre_carpeta>: Crea un volumen
+    docker volume htdocs
+-docker volume inspect htdocs: Da info de de donde esa esa carpeta
+-docker... --restart always http: Comando imprescindile en prod (IMPORTANTE)
+    Esto hara que el proveedor del host se reinicie con el server
+
+== NETWORKS DOCKER
+-docker network list: Lista networks
+-docker network create wordpress: Crea una network
+-docker network inspect wordpress: Lista info de ese network
+-docker run --name mysql --network wordpress -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DB=wordpressdb mariadb
+    Con la flag --network wordpress => Enlaza esta db con la network creada
+-docker run --name wordpress -e WORDPRESS_DB_HOST=<container_name_db>:3306
+    -eWORDPRESS_DB_USER=root -e WORDPRESS_DB_PASSWORD=1234 -e WORDPRESS_DB_NAME= -d wordpress
+-docker logs -f wordpress: Logs del container
+
+
+==LAVA COMMANDS==
+EmisorLavamancerx: docker network create wordpress
+EmisorLavamancerx: docker run --name mysql --network wordpress -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DATABASE=wordpressdb mariadb
+EmisorLavamancerx: docker run --name wordpress --network wordpress -p 8086:80 -e WORDPRESS_DB_HOST=mysql:3306 -e WORDPRESS_DB_USER=root -e WORDPRESS_DB_PASSWORD=1234 -e WORDPRESS_DB_NAME=wordpressdb -d wordpress
+
+letsencreypt => Para generar certificados ssl
+
+
+== ENTRYPOINT DOCKER
+Comando que ejecutara el docker

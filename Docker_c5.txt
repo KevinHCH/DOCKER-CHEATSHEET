@@ -1,0 +1,73 @@
+### DOCKER NETWORKING
+    Al instalar el engine de docker, preapara una interfaz de red en el host 
+        para que los contendores puedan usarla
+        Ejemplo: ifconfig => Devolverá una interfaz llamada DOCKER0
+    
+    - docker network ls: Muestra las redes "alojadas" por docker
+    Levanta 3 por defecto:
+        +Birdge: Red por defecto, es la interfaz docker0 y significa que cualquier
+            contenedor que pertenzca a esta red puede conectar concualquier 
+            contenedor que tambien este desplegado
+        +Host: Contenedor que pertenec a esta red, solamente esta conectado con la maquina host
+        +None: Contenedor que no pertenece a ningun contenedor
+
+    - docker network create --driver bridge aislada: Permite crear redes propias
+        Ejemplo: docker network create --driver bridge pruebas2
+
+        ## ESQUEMA DE CONTENEDORES BRIDGE
+
+        MYSQL                   PHP                 PHPMYADMIN
+        ========================================================== => BRIDGE --\
+        3306=================== 80 =============================== => FRONT ----> NETWORK
+        ============================================ 8081 ======== => BACK ----/
+
+        ## EJEMPLO DOCKER COMPOSE
+        version: '2'
+        services: #siempre empieza con services, al usar YML es muy importante la TABULACION
+            mysql:
+                build: ./mysql #Ve a la carpeta mysql y ejecuta el dockerfile que encuentres ahi
+                ports:
+                    - '3306:3306'
+                environment:
+                    MYSQL_USER: root
+                    MYSQL_PASSWORD: 1234
+                    MYSQL_ROOT_PASSWORD: pass
+                    MYSQL_DATABASE: dbase
+                volumes:
+                    - db:/var/lib/mysql
+                netowrks:
+                    - front #Se establece en que nivel estara conectado dentro de nuestra red que hemos definido abajo
+            php:
+                build: ./apache
+                ports:
+                    - '80:80'
+                #Volumenes: Son como un disco duro externo en el que el contenedor puede escribir
+                volumes:
+                    - ./html:/var/www/html
+                depends_on:
+                    - mysql #Estalece que si no ha arrancado el contenedor de mysql, el de php no podra hacerlo
+                networks:
+                    - front #Se establece en que nivel estara conectado dentro de nuestra red que hemos definido abajo
+            phpmyadmin: #Estos nombres son unicos en docker-compose, si se repite el nombre, no levanta el repetido
+                image: phpmyadmin/phpmyadmin #si no existe la imagen, la descarga de docker hub
+                links:
+                    - mysql #Se enlaza con el contenedor de mysql
+                ports:
+                    - '8080:80'
+                environment: #Conexion a la base de datos
+                    PMA_HOST: mysql
+                    PMA_PORT: 3306
+                networks:
+                    - back #Se establece en que nivel estara conectado dentro de nuestra red que hemos definido abajo
+        #Se establecen las redes que tendremos en la red local
+        netowrks:
+            back:
+            front:
+            midd:
+        volumes:
+            db:
+        ### FIN EJEMPLO DOCKER COMPOSE
+    
+    - docker network inspect <network_id>: Permite ver los contenedores conectados entre si por esa network
+
+    Buscar mas sobre docker network

@@ -1,0 +1,24 @@
+### DOCKER VOLUMENES
+    -Directorios que se comparten entre el HOST y el CONTENEDOR
+    -Los volumenes se inicializan junto a la creacion de un contendor,
+        pueden ser compartidos y reutilizados entre contendores.
+    -Los cambios que se realicen seran de forma directa, estos cambios
+        no afectan a la máquina
+    -Los datos perduran incluso si se borra el contenedor 
+
+    ## COMANDOS
+        -docker volume create
+        -docker volume inspect
+        -docker volume ls: Lista volumenes creados
+        -docker volume prune: Borra todos los volumenes que no esta referenciado
+        -docker volume rm <id>: Borra el volumen
+
+        -docker -it -v <ruta_local>:<ruta_contenedor> <img_nombre> bash: Es importante
+            separar las rutas de los dirs con los ":"
+        Estructura en docker-compose
+        services:
+            mysql:
+                - datavolume:/var/run/mysql
+            php:
+                volumes_from:
+                    - mysql:/var/run/mysqld
